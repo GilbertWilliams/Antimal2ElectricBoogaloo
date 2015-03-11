@@ -83,7 +83,7 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
         self.rect.x = x
         self.rect.y = y
         self.dx = 0
-        self.dy = 5
+        self.dy = 7
     def update(self):
         # Change enemy position
         self.rect.x += self.dx
@@ -94,6 +94,16 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
             self.kill()
         if self.rect.y > 600 or self.rect.y < -50:
             self.kill()
+
+class secretEnemy(Enemy):
+    def __init__(self, x, y):
+        Enemy.__init__(self, x, y)
+        self.image = pygame.image.load('resources\OC.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.dx = 3
+        self.dy = 0
 
 '''
 Current goals:
@@ -121,7 +131,8 @@ def main():
     #Spawns enemies at random X values and offscreen by 50 on the Y axis
     enemy = [Enemy(randrange(0, 750, 1), -50), 
              Enemy(randrange(0, 750, 1), -50),
-             Enemy(randrange(0, 750, 1), -50)]
+             Enemy(randrange(0, 750, 1), -50),
+             secretEnemy(-50, randrange(0, 300, 1))]
 
 
 
@@ -141,7 +152,7 @@ def main():
 
     scoreFont = pygame.font.SysFont("courier", 24)
 
-    gameoverFont = pygame.font.SysFont("comicsansms", 32)
+    gameoverFont = pygame.font.SysFont("comicsansms", 48)
 
 
     #Set Clock
@@ -199,12 +210,12 @@ def main():
         score = player.headcount
         scoreString = str(score)
         scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
-        screen.blit(scoreboard, (50,100))
+        screen.blit(scoreboard, (25,25))
 
         if not playerSprite.has(player): # Check if player has died
             allSprites.empty() # Clear all sprites
             gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
-            screen.blit(gameover, (50,50))
+            screen.blit(gameover, (300,300))
 
         # Update the display
         pygame.display.update()
