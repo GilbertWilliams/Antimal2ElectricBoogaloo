@@ -1,7 +1,7 @@
 __author__ = 'Austen Stewart, Joey Tarleton, and Robert Wilhelmsen'
 
 # Import pygame and all of it's classes
-import pygame
+import pygame, time
 from pygame.locals import *
 from random import randrange
 
@@ -67,6 +67,12 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
             if self.rect.y < -50:
                 self.kill()
 
+class enemyBullet(Bullet):
+    def __init__(self):
+        Bullet.__init__(self)
+        self.image = pygame.image.load('resources/kha.png')
+        self.vel = 20
+
 
 class Enemy(pygame.sprite.Sprite): # Enemy super class
     '''
@@ -104,6 +110,9 @@ class secretEnemy(Enemy):
         self.rect.y = y
         self.dx = 3
         self.dy = 0
+            
+        
+        
 
 '''
 Current goals:
@@ -211,6 +220,8 @@ def main():
         scoreString = str(score)
         scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
         screen.blit(scoreboard, (25,25))
+
+        # Enemy counter for boss fight
 
         if not playerSprite.has(player): # Check if player has died
             allSprites.empty() # Clear all sprites
