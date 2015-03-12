@@ -55,16 +55,17 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
         pygame.sprite.Sprite.__init__(self) # Initiate parent class
         self.image = pygame.image.load('resources/disc.png') # Set sprite image
         self.rect = self.image.get_rect() # Get rectangle from sprite image
+        self.rect.x = -100
+        self.rect.y = -100
         self.vel = -20 # Default velocity
 
     def update(self):
         self.rect.y += self.vel # Change bullet position
-        if pygame.sprite.spritecollide(bullet, enemySprites, True): # Check for collision between bullet and enemies
-            self.kill() #remove bullet if it collides with an enemy
+        if pygame.sprite.groupcollide(bulletSprites, enemySprites, True, True) or pygame.sprite.groupcollide(bulletSprites, flyerSprites, True, True): # Check for collision between bullet and enemies
             player.headcount += 1 # Add to player score if enemy is hit
 
             # Set boundaries
-            if self.rect.y < -50:
+            if self.rect.y <= -100:
                 self.kill()
 
 class enemyBullet(Bullet):
@@ -126,9 +127,10 @@ Current goals:
 def main():
 
     global bullet
-    global bullet_list
+    global bulletSprites
     global allSprites
     global enemySprites
+    global flyerSprites
     global score
 
 
@@ -138,29 +140,39 @@ def main():
 
     global enemy
     #Spawns enemies at random X values and offscreen by 50 on the Y axis
-    enemy = [Enemy(randrange(0, 750, 1), -50), 
-             Enemy(randrange(0, 750, 1), -50),
-             Enemy(randrange(0, 750, 1), -50),
-             secretEnemy(-50, randrange(0, 300, 1))]
+    enemy = [Enemy(randrange(0, 750, 1), randrange(-50, 50, 1))]
 
+    flyer = [secretEnemy(randrange(-50, 50, 1), randrange(0, 300, 1))]
 
+    # Add more initial enemies
+    for x in range(0, 3):
+        enemy.append(Enemy(randrange(0, 750, 1), randrange(-50, 50, 1)))
+        flyer.append(secretEnemy(randrange(-50, 50, 1), randrange(0, 300, 1)))
+
+    global bullet
+    # Create the single bullet the player has
+    
 
     # Define sprite groups
     allSprites = pygame.sprite.RenderPlain()
     playerSprite = pygame.sprite.RenderPlain()
-    bullet_list = pygame.sprite.RenderPlain()
+    bulletSprites = pygame.sprite.RenderPlain()
     enemySprites = pygame.sprite.RenderPlain()
+    flyerSprites = pygame.sprite.RenderPlain()
 
     # Add sprites to appropriate groups
     playerSprite.add(player)
     allSprites.add(player)
     enemySprites.add(enemy)
     allSprites.add(enemy)
+    flyerSprites.add(flyer)
+    allSprites.add(flyer)
+
 
     pVel = 20 # Set default player velocity to pass to Player constructor
-
+    
+    # Set fonts
     scoreFont = pygame.font.SysFont("courier", 24)
-
     gameoverFont = pygame.font.SysFont("comicsansms", 48)
 
 
@@ -189,10 +201,11 @@ def main():
                     player.move(pVel, 'y')
                 elif event.key == pygame.K_SPACE:
                     bullet = Bullet()
+                    bulletSprites.add(bullet)
+                    allSprites.add(bullet)
                     bullet.rect.x = player.rect.x
                     bullet.rect.y = player.rect.y
-                    bullet_list.add(bullet)
-                    allSprites.add(bullet)
+
 
             # Stop Moving
             elif event.type == pygame.KEYUP:
@@ -210,6 +223,16 @@ def main():
         # Create screen surface object and draw objects on it
         screen.fill((255,255,255))
 
+        # Infinitely Spawn Enemies (what could go wrong?)
+        if playerSprite.has(player):
+            if enemySprites.__len__() <= 10:
+                newEnemy = Enemy(randrange(0, 750, 1), randrange(-150, -50, 1))
+                enemySprites.add(newEnemy)
+                allSprites.add(newEnemy)
+            if flyerSprites.__len__() <= 5:
+                newFlyer = secretEnemy(randrange(-150, -50, 1), randrange(0, 300, 1))
+                flyerSprites.add(newFlyer)
+                allSprites.add(newFlyer)
 
         # Update and draw all sprites
         allSprites.update()
@@ -222,8 +245,13 @@ def main():
         screen.blit(scoreboard, (25,25))
 
         # Enemy counter for boss fight
+        if score >= 11:
+            pass
+            
 
+        # It's game over, man, game over!
         if not playerSprite.has(player): # Check if player has died
+            enemySprites.empty()
             allSprites.empty() # Clear all sprites
             gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
             screen.blit(gameover, (300,300))
