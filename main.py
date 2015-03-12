@@ -117,10 +117,8 @@ class secretEnemy(Enemy):
 
 '''
 Current goals:
-    Add X axis movements for enemies
-    Enemy subclasses for different enemy types
-    Create collisions between players and enemies
-    Design the first level and corresponding boss fight
+    Add enemy projectiles
+    Design the first boss fight
     Title Screen
 '''
 
