@@ -146,7 +146,6 @@ def main():
     # Add more initial enemies
     for x in range(0, 3):
         enemy.append(Enemy(randrange(0, 750, 1), randrange(-50, 50, 1)))
-        flyer.append(secretEnemy(randrange(-50, 50, 1), randrange(0, 300, 1)))
 
     # Bullet variable for later creation of Bullet object
     global bullet
@@ -231,7 +230,7 @@ def main():
                 enemySprites.add(newEnemy)
                 allSprites.add(newEnemy)
             if flyerSprites.__len__() <= 5:
-                newFlyer = secretEnemy(randrange(-150, -50, 1), randrange(0, 300, 1))
+                newFlyer = secretEnemy(randrange(-150, -50, 1), randrange(0, 100, 1))
                 flyerSprites.add(newFlyer)
                 allSprites.add(newFlyer)
 
