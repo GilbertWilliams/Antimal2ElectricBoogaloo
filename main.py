@@ -232,6 +232,9 @@ def main():
                     player.move(0, 'y')
                 elif event.key == pygame.K_ESCAPE:
                     keepGoing = False
+                elif event.key == pygame.K_SPACE and not playerSprite.has(player):
+                    gm = mainMenu()
+                    gm.run()
                     
 
 
@@ -276,6 +279,69 @@ def main():
         if keepGoing == False:
             pygame.quit()
 
+class menuCursor(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.font = pygame.font.SysFont('courier', 48)
+        self.color = (0, 255, 0)
+        self.image = self.font.render('>', 1, self.color)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+class mainMenu():
+    def __init__(self):
+        self.clock = pygame.time.Clock()
+        self.font = pygame.font.SysFont('courier', 48)
+        self.titleFont = pygame.font.SysFont('courier', 53)
+        self.color = (0, 255, 0)
+
+    def run(self):
+        title = self.titleFont.render('Lembalo: Virus Breaker', 1, self.color)
+        start = self.font.render('Start', 1, self.color)
+        quitgame = self.font.render('Quit', 1, self.color)
+        
+        cursor = 0
+        brace = menuCursor(50, 300)
+        bracegroup = pygame.sprite.Group()
+        bracegroup.add(brace)
+        
+        mainloop = True
+        while mainloop:
+            self.clock.tick(30)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    mainloop = False
+                elif event.type == KEYUP:
+                    if event.key == K_DOWN and cursor == 0:
+                        cursor = 1
+                        brace.rect.y = 400
+                    elif event.key == K_UP and cursor == 1:
+                        cursor = 0
+                        brace.rect.y = 300
+                    elif event.key == K_SPACE:
+                        if cursor == 0:
+                            mainloop = False
+                            main()
+                        elif cursor == 1:
+                            mainloop = False
+                    elif event.key == K_ESCAPE:
+                        mainloop = False
+                    
+
+            screen.fill((0, 0, 0))
+            screen.blit(title, (50, 50))
+            screen.blit(start, (100, 300))
+            screen.blit(quitgame, (100, 400))
+            bracegroup.draw(screen)
+            bracegroup.update()
+                
+                
+            pygame.display.update()
+        pygame.quit()
+
 
 if __name__ == '__main__':
-    main() # Run the main class
+    gm = mainMenu()
+    gm.run()
