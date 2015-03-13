@@ -297,7 +297,7 @@ def main():
         scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
         screen.blit(scoreboard, (25,25))
 
-        scoreLimit = 3
+        scoreLimit = 30
         # Enemy counter for boss fight
         if score >= scoreLimit and not hasSpawned:
             bossSprite.add(boss)
