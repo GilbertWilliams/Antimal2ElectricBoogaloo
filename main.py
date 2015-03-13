@@ -10,12 +10,13 @@ pygame.display.set_caption("Space Shooter") # Set window title
 screen = pygame.display.set_mode((800, 600)) # Set window dimensions
 pygame.mouse.set_visible(0) # Cursor
 
+
 #NOTE: All sprite images (with the exception of bullets) are 50x50
 
 class Player(pygame.sprite.Sprite): # Player Class
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('resources/protag.png') # Load player sprite image
+        self.image = pygame.image.load('resources\protag.png') # Load player sprite image
         self.rect = self.image.get_rect() # Make a rectangle using the image dimensions
         self.rect.x = x # Set top left x coordinate to passed value
         self.rect.y = y # Set top left y coordinate to passed value
@@ -53,7 +54,7 @@ class Player(pygame.sprite.Sprite): # Player Class
 class Bullet(pygame.sprite.Sprite): # Projectile Class
     def __init__(self):
         pygame.sprite.Sprite.__init__(self) # Initiate parent class
-        self.image = pygame.image.load('resources/disc.png') # Set sprite image
+        self.image = pygame.image.load('resources\disc.png') # Set sprite image
         self.rect = self.image.get_rect() # Get rectangle from sprite image
         self.rect.x = -100
         self.rect.y = -100
@@ -65,14 +66,15 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
         if pygame.sprite.groupcollide(bulletSprites, enemySprites, True, True) or pygame.sprite.groupcollide(bulletSprites, flyerSprites, True, True): 
             player.headcount += 1 # Add to player score if enemy is hit
 
-            # Set boundaries
-            if self.rect.y <= -100:
-                self.kill()
+        # Set boundaries
+        if self.rect.y <= -100:
+             self.kill()
+        
 
 class enemyBullet(Bullet):
     def __init__(self):
         Bullet.__init__(self)
-        self.image = pygame.image.load('resources/kha.png')
+        self.image = pygame.image.load('resources\kha.png')
         self.vel = 20
 
 
@@ -106,7 +108,7 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
 class secretEnemy(Enemy):
     def __init__(self, x, y):
         Enemy.__init__(self, x, y)
-        self.image = pygame.image.load('resources\ufo.png')
+        self.image = pygame.image.load('resources/ufo.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -120,9 +122,23 @@ class Boss(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        
-        
+        self.health = 10
+        self.dx = 6
+        self.bosscounter = 0
 
+    def update(self):
+        self.rect.x += self.dx
+
+        if self.rect.x <= 0:
+            self.rect.x = 0
+            self.dx = 6
+        if self.rect.x >= 650:
+            self.rect.x = 650
+            self.dx = -6
+        if pygame.sprite.spritecollide(boss, bulletSprites, True):
+            self.health -= 1
+        if self.health == 0:
+            self.kill()
 '''
 Current goals:
     Add enemy projectiles
@@ -137,6 +153,7 @@ def main():
     global enemySprites
     global flyerSprites
     global score
+    global bossSprite
 
 
     # Create an instance of the player at a certain position
@@ -159,7 +176,7 @@ def main():
 
     # Create boss object
     global boss
-    boss = Boss(350, 100)
+    boss = Boss(325, 50)
     
     # Define sprite groups
     allSprites = pygame.sprite.RenderPlain()
@@ -176,7 +193,6 @@ def main():
     allSprites.add(enemy)
     flyerSprites.add(flyer)
     allSprites.add(flyer)
-    bossSprite.add(boss)
     
     
 
@@ -185,12 +201,13 @@ def main():
     
     # Set fonts
     scoreFont = pygame.font.SysFont("courier", 24)
-    gameoverFont = pygame.font.SysFont("comicsansms", 48)
+    gameoverFont = pygame.font.SysFont("courier", 48)
 
 
     #Set Clock
     clock = pygame.time.Clock()
     keepGoing = True
+    hasSpawned = False
     counter = 0
 
 
@@ -241,17 +258,6 @@ def main():
         # Create screen surface object and draw objects on it
         screen.fill((255,255,255))
 
-        # Infinitely Spawn Enemies until player has died or boss has spawned
-        if playerSprite.has(player) and not allSprites.has(boss):
-            if enemySprites.__len__() <= 10:
-                newEnemy = Enemy(randrange(0, 750, 1), randrange(-150, -50, 1))
-                enemySprites.add(newEnemy)
-                allSprites.add(newEnemy)
-            if flyerSprites.__len__() <= 5:
-                newFlyer = secretEnemy(randrange(-150, -50, 1), randrange(0, 100, 1))
-                flyerSprites.add(newFlyer)
-                allSprites.add(newFlyer)
-
         # Update and draw all sprites
         allSprites.update()
         allSprites.draw(screen)
@@ -270,8 +276,21 @@ def main():
         screen.blit(scoreboard, (25,25))
 
         # Enemy counter for boss fight
-        if score >= 11:
+        if score >= 11 and not hasSpawned:
+            bossSprite.add(boss)
             allSprites.add(boss)
+            hasSpawned = True
+
+        # Infinitely Spawn Enemies until player has died or boss has spawned
+        if playerSprite.has(player) and not hasSpawned:
+            if enemySprites.__len__() <= 10:
+                newEnemy = Enemy(randrange(0, 750, 1), randrange(-150, -50, 1))
+                enemySprites.add(newEnemy)
+                allSprites.add(newEnemy)
+            if flyerSprites.__len__() <= 5:
+                newFlyer = secretEnemy(randrange(-150, -50, 1), randrange(0, 100, 1))
+                flyerSprites.add(newFlyer)
+                allSprites.add(newFlyer)
 
         # Update the display
         pygame.display.update()
