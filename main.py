@@ -47,7 +47,7 @@ class Player(pygame.sprite.Sprite): # Player Class
             self.rect.y = 0
 
         # Creates collision with enemies and deletes itself
-        if pygame.sprite.spritecollide(player, enemySprites, True):
+        if pygame.sprite.spritecollide(player, enemySprites, True) or pygame.sprite.spritecollide(player, flyerSprites, True):
             self.kill()
 
 
@@ -68,23 +68,29 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
 
         # Set boundaries
         if self.rect.y <= -100:
-             self.kill()
-        
+
+            self.kill()
 
 class enemyBullet(Bullet):
-    def __init__(self):
+    def __init__(self, x, y):
         Bullet.__init__(self)
         self.image = pygame.image.load('resources\kha.png')
-        self.vel = 20
+        self.vel = 10
+        self.rect.x = x
+        self.rect.y = y
 
+    def update(self):
+        self.rect.y += self.vel
+
+        # Check for collision between bullet and player
+        if pygame.sprite.spritecollide(player, enemyBullets, True):
+            player.kill()
+
+        # Set boundaries
+        if self.rect.y >= 650:
+            self.kill()
 
 class Enemy(pygame.sprite.Sprite): # Enemy super class
-    '''
-    This is the enemy super class. It is designed to hold all of the necessary variables for enemies that can be
-    changed according to varying enemy types. Perhaps later this can be consolidated into a super class for both the
-    Player and Enemy classes.
-    '''
-
     def __init__(self, x, y):
         # Default values
         pygame.sprite.Sprite.__init__(self)
@@ -141,7 +147,6 @@ class Boss(pygame.sprite.Sprite):
             self.kill()
 '''
 Current goals:
-    Add enemy projectiles
     Design the first boss fight
 '''
 
@@ -154,6 +159,7 @@ def main():
     global flyerSprites
     global score
     global bossSprite
+    global enemyBullets
 
 
     # Create an instance of the player at a certain position
@@ -172,7 +178,7 @@ def main():
 
     # Bullet variable for later creation of Bullet object
     global bullet
-
+    global flyerBullet
 
     # Create boss object
     global boss
@@ -185,6 +191,7 @@ def main():
     enemySprites = pygame.sprite.RenderPlain()
     flyerSprites = pygame.sprite.RenderPlain()
     bossSprite = pygame.sprite.RenderPlain()
+    enemyBullets = pygame.sprite.RenderPlain()
 
     # Add sprites to appropriate groups
     playerSprite.add(player)
@@ -198,6 +205,10 @@ def main():
 
 
     pVel = 20 # Set default player velocity to pass to Player constructor
+
+    reloadspeed = 1000
+    reloadEvent = pygame.USEREVENT + 1
+    Reloaded = True
     
     # Set fonts
     scoreFont = pygame.font.SysFont("courier", 24)
@@ -251,9 +262,16 @@ def main():
                 elif event.key == pygame.K_SPACE and not playerSprite.has(player):
                     gm = mainMenu()
                     gm.run()
+
+            elif event.type == reloadEvent:
+                for flyer in flyerSprites:
+                    Reloaded = True
+                    reloadspeed += randrange(0, 500, 100)
+                    flyerBullet = enemyBullet(flyer.rect.x, flyer.rect.y)
+                    enemyBullets.add(flyerBullet)
+                    allSprites.add(flyerBullet)
+                    pygame.time.set_timer(reloadEvent, 0)
                     
-
-
 
         # Create screen surface object and draw objects on it
         screen.fill((255,255,255))
@@ -261,13 +279,6 @@ def main():
         # Update and draw all sprites
         allSprites.update()
         allSprites.draw(screen)
-
-        # It's game over, man, game over!
-        if not playerSprite.has(player): # Check if player has died
-            enemySprites.empty()
-            allSprites.empty() # Clear all sprites
-            gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
-            screen.blit(gameover, (300,300))
 
         # Keep score
         score = player.headcount
@@ -281,16 +292,30 @@ def main():
             allSprites.add(boss)
             hasSpawned = True
 
+        
         # Infinitely Spawn Enemies until player has died or boss has spawned
         if playerSprite.has(player) and not hasSpawned:
             if enemySprites.__len__() <= 10:
                 newEnemy = Enemy(randrange(0, 750, 1), randrange(-150, -50, 1))
                 enemySprites.add(newEnemy)
                 allSprites.add(newEnemy)
-            if flyerSprites.__len__() <= 5:
+            if flyerSprites.__len__() <= 3:
                 newFlyer = secretEnemy(randrange(-150, -50, 1), randrange(0, 100, 1))
                 flyerSprites.add(newFlyer)
                 allSprites.add(newFlyer)
+
+        if Reloaded and playerSprite.has(player): #Check if player is alive and enemies can shoot
+            Reloaded = False # Expend shot
+            pygame.time.set_timer(reloadEvent, reloadspeed) # Repeat
+
+        # It's game over, man, game over!
+        if not playerSprite.has(player): # Check if player has died
+            enemySprites.empty()
+            allSprites.empty() # Clear all sprites
+            gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
+            screen.blit(gameover, (250,300))
+            pressSpace = gameoverFont.render("Press Space To Return", 1, (0, 0, 0))
+            screen.blit(pressSpace, (150, 500))
 
         # Update the display
         pygame.display.update()
@@ -311,11 +336,13 @@ class mainMenu():
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont('courier', 48)
         self.titleFont = pygame.font.SysFont('courier', 53)
+        self.directFont = pygame.font.SysFont('courier', 24)
         self.color = (0, 255, 0)
 
     def run(self):
         title = self.titleFont.render('Lembalo: Virus Breaker', 1, self.color)
         start = self.font.render('Start', 1, self.color)
+        directions = self.directFont.render('Arrow Keys To Move. Space to Shoot. Good Luck.', 1, self.color)
         quitgame = self.font.render('Quit', 1, self.color)
         
         cursor = 0
@@ -351,6 +378,7 @@ class mainMenu():
             screen.blit(title, (50, 50))
             screen.blit(start, (100, 300))
             screen.blit(quitgame, (100, 400))
+            screen.blit(directions, (50, 550))
             bracegroup.draw(screen)
             bracegroup.update()
                 
