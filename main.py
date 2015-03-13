@@ -145,10 +145,7 @@ class Boss(pygame.sprite.Sprite):
             self.health -= 1
         if self.health == 0:
             self.kill()
-'''
-Current goals:
-    Design the first boss fight
-'''
+            hasDied = True
 
 def main():
 
@@ -160,6 +157,8 @@ def main():
     global score
     global bossSprite
     global enemyBullets
+    global hasDied
+    hasDied = False
 
 
     # Create an instance of the player at a certain position
@@ -200,15 +199,16 @@ def main():
     allSprites.add(enemy)
     flyerSprites.add(flyer)
     allSprites.add(flyer)
-    
-    
-
 
     pVel = 20 # Set default player velocity to pass to Player constructor
 
     reloadspeed = 1000
     reloadEvent = pygame.USEREVENT + 1
     Reloaded = True
+
+    bossReload = True
+    bossrs = 750
+    bossre = pygame.USEREVENT + 2
     
     # Set fonts
     scoreFont = pygame.font.SysFont("courier", 24)
@@ -262,6 +262,9 @@ def main():
                 elif event.key == pygame.K_SPACE and not playerSprite.has(player):
                     gm = mainMenu()
                     gm.run()
+                elif score >= scoreLimit and not bossSprite.has(boss):
+                    gm = mainMenu()
+                    gm.run()
 
             elif event.type == reloadEvent:
                 for flyer in flyerSprites:
@@ -271,6 +274,14 @@ def main():
                     enemyBullets.add(flyerBullet)
                     allSprites.add(flyerBullet)
                     pygame.time.set_timer(reloadEvent, 0)
+
+            elif event.type == bossre:
+                bossReload = True
+                bossBullet1 = enemyBullet(boss.rect.x, boss.rect.y + 75)
+                bossBullet2 = enemyBullet(boss.rect.x + 150, boss.rect.y + 75)
+                enemyBullets.add(bossBullet1, bossBullet2)
+                allSprites.add(bossBullet1, bossBullet2)
+                pygame.time.set_timer(reloadEvent, 0)
                     
 
         # Create screen surface object and draw objects on it
@@ -286,8 +297,9 @@ def main():
         scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
         screen.blit(scoreboard, (25,25))
 
+        scoreLimit = 3
         # Enemy counter for boss fight
-        if score >= 11 and not hasSpawned:
+        if score >= scoreLimit and not hasSpawned:
             bossSprite.add(boss)
             allSprites.add(boss)
             hasSpawned = True
@@ -304,17 +316,26 @@ def main():
                 flyerSprites.add(newFlyer)
                 allSprites.add(newFlyer)
 
-        if Reloaded and playerSprite.has(player): #Check if player is alive and enemies can shoot
+        if Reloaded and playerSprite.has(player): # Check if player is alive and enemies can shoot
             Reloaded = False # Expend shot
             pygame.time.set_timer(reloadEvent, reloadspeed) # Repeat
 
+        if bossReload and playerSprite.has(player) and hasSpawned: # Repeat for when boss spawns
+            bossReload = False
+            pygame.time.set_timer(bossre, bossrs)
+
         # It's game over, man, game over!
+        gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
+        pressSpace = gameoverFont.render("Press Space To Return", 1, (0, 0, 0))
+        win = gameoverFont.render("You Win", 1, (0, 0, 0))
         if not playerSprite.has(player): # Check if player has died
             enemySprites.empty()
             allSprites.empty() # Clear all sprites
-            gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
             screen.blit(gameover, (250,300))
-            pressSpace = gameoverFont.render("Press Space To Return", 1, (0, 0, 0))
+            screen.blit(pressSpace, (150, 500))
+        if score >= scoreLimit and not bossSprite.has(boss): # Check if boss has died
+            allSprites.empty()
+            screen.blit(win, (250, 300))
             screen.blit(pressSpace, (150, 500))
 
         # Update the display
