@@ -36,12 +36,12 @@ class Player(pygame.sprite.Sprite): # Player Class
         self.rect.y += self.dy
 
         # Set player boundaries
-        if self.rect.x >= 750:
-            self.rect.x = 750
+        if self.rect.x >= 800 - self.image.get_width():
+            self.rect.x = 800 - self.image.get_width()
         if self.rect.x <= 0:
             self.rect.x = 0
-        if self.rect.y >= 550:
-            self.rect.y = 550
+        if self.rect.y >= 600 - self.image.get_height():
+            self.rect.y = 600 - self.image.get_height()
         if self.rect.y <= 0:
             self.rect.y = 0
 
@@ -118,8 +118,8 @@ class Boss(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('resources\hotshotgg.png')
         self.rect = self.image.get_rect()
-        self.x = self.rect.x
-        self.y = self.rect.y
+        self.rect.x = x
+        self.rect.y = y
         
         
 
@@ -157,6 +157,8 @@ def main():
     # Bullet variable for later creation of Bullet object
     global bullet
 
+
+    # Create boss object
     global boss
     boss = Boss(350, 100)
     
@@ -237,8 +239,8 @@ def main():
         # Create screen surface object and draw objects on it
         screen.fill((255,255,255))
 
-        # Infinitely Spawn Enemies (what could go wrong?)
-        if playerSprite.has(player):
+        # Infinitely Spawn Enemies until player has died or boss has spawned
+        if playerSprite.has(player) and not allSprites.has(boss):
             if enemySprites.__len__() <= 10:
                 newEnemy = Enemy(randrange(0, 750, 1), randrange(-150, -50, 1))
                 enemySprites.add(newEnemy)
@@ -247,16 +249,6 @@ def main():
                 newFlyer = secretEnemy(randrange(-150, -50, 1), randrange(0, 100, 1))
                 flyerSprites.add(newFlyer)
                 allSprites.add(newFlyer)
-
-        # Keep score
-        score = player.headcount
-        scoreString = str(score)
-        scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
-        screen.blit(scoreboard, (25,25))
-
-        # Enemy counter for boss fight
-        if score >= 11:
-            allSprites.add(boss)
 
         # Update and draw all sprites
         allSprites.update()
@@ -268,6 +260,16 @@ def main():
             allSprites.empty() # Clear all sprites
             gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
             screen.blit(gameover, (300,300))
+
+        # Keep score
+        score = player.headcount
+        scoreString = str(score)
+        scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
+        screen.blit(scoreboard, (25,25))
+
+        # Enemy counter for boss fight
+        if score >= 11:
+            allSprites.add(boss)
 
         # Update the display
         pygame.display.update()
