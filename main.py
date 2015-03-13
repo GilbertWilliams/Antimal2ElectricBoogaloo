@@ -1,7 +1,7 @@
 __author__ = 'Austen Stewart, Joey Tarleton, and Robert Wilhelmsen'
 
 # Import pygame and all of it's classes
-import pygame, time
+import pygame, time, sys
 from pygame.locals import *
 from random import randrange
 
@@ -15,7 +15,7 @@ pygame.mouse.set_visible(0) # Cursor
 class Player(pygame.sprite.Sprite): # Player Class
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('resources/theplanmanbob.png') # Load player sprite image
+        self.image = pygame.image.load('resources/protag.png') # Load player sprite image
         self.rect = self.image.get_rect() # Make a rectangle using the image dimensions
         self.rect.x = x # Set top left x coordinate to passed value
         self.rect.y = y # Set top left y coordinate to passed value
@@ -61,7 +61,8 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
 
     def update(self):
         self.rect.y += self.vel # Change bullet position
-        if pygame.sprite.groupcollide(bulletSprites, enemySprites, True, True) or pygame.sprite.groupcollide(bulletSprites, flyerSprites, True, True): # Check for collision between bullet and enemies
+        # Check for collision between bullet and enemies
+        if pygame.sprite.groupcollide(bulletSprites, enemySprites, True, True) or pygame.sprite.groupcollide(bulletSprites, flyerSprites, True, True): 
             player.headcount += 1 # Add to player score if enemy is hit
 
             # Set boundaries
@@ -85,7 +86,7 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
     def __init__(self, x, y):
         # Default values
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('resources\Soulface.png')
+        self.image = pygame.image.load('resources\missile.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -105,7 +106,7 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
 class secretEnemy(Enemy):
     def __init__(self, x, y):
         Enemy.__init__(self, x, y)
-        self.image = pygame.image.load('resources\OC.png')
+        self.image = pygame.image.load('resources\ufo.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -147,10 +148,9 @@ def main():
         enemy.append(Enemy(randrange(0, 750, 1), randrange(-50, 50, 1)))
         flyer.append(secretEnemy(randrange(-50, 50, 1), randrange(0, 300, 1)))
 
+    # Bullet variable for later creation of Bullet object
     global bullet
-    # Create the single bullet the player has
     
-
     # Define sprite groups
     allSprites = pygame.sprite.RenderPlain()
     playerSprite = pygame.sprite.RenderPlain()
@@ -185,7 +185,7 @@ def main():
         clock.tick(30)
         #input
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or event.type == pygame.K_ESCAPE:
+            if event.type == pygame.QUIT:
                 keepGoing = False
             #Controls
             elif event.type == pygame.KEYDOWN:
@@ -215,6 +215,9 @@ def main():
                     player.move(0, 'y')
                 elif event.key == pygame.K_DOWN:
                     player.move(0, 'y')
+                elif event.key == pygame.K_ESCAPE:
+                    keepGoing = False
+                    
 
 
 
@@ -232,10 +235,6 @@ def main():
                 flyerSprites.add(newFlyer)
                 allSprites.add(newFlyer)
 
-        # Update and draw all sprites
-        allSprites.update()
-        allSprites.draw(screen)
-
         # Keep score
         score = player.headcount
         scoreString = str(score)
@@ -245,7 +244,10 @@ def main():
         # Enemy counter for boss fight
         if score >= 11:
             pass
-            
+
+        # Update and draw all sprites
+        allSprites.update()
+        allSprites.draw(screen)
 
         # It's game over, man, game over!
         if not playerSprite.has(player): # Check if player has died
@@ -256,6 +258,8 @@ def main():
 
         # Update the display
         pygame.display.update()
+        if keepGoing == False:
+            pygame.quit()
 
 
 if __name__ == '__main__':
