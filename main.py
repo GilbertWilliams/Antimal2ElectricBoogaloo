@@ -112,7 +112,14 @@ class secretEnemy(Enemy):
         self.rect.y = y
         self.dx = 3
         self.dy = 0
-            
+
+class Boss(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('resources\hotshotgg.png')
+        self.rect = self.image.get_rect()
+        self.x = self.rect.x
+        self.y = self.rect.y
         
         
 
@@ -149,6 +156,9 @@ def main():
 
     # Bullet variable for later creation of Bullet object
     global bullet
+
+    global boss
+    boss = Boss(350, 100)
     
     # Define sprite groups
     allSprites = pygame.sprite.RenderPlain()
@@ -156,6 +166,7 @@ def main():
     bulletSprites = pygame.sprite.RenderPlain()
     enemySprites = pygame.sprite.RenderPlain()
     flyerSprites = pygame.sprite.RenderPlain()
+    bossSprite = pygame.sprite.RenderPlain()
 
     # Add sprites to appropriate groups
     playerSprite.add(player)
@@ -164,6 +175,9 @@ def main():
     allSprites.add(enemy)
     flyerSprites.add(flyer)
     allSprites.add(flyer)
+    bossSprite.add(boss)
+    
+    
 
 
     pVel = 20 # Set default player velocity to pass to Player constructor
@@ -242,7 +256,7 @@ def main():
 
         # Enemy counter for boss fight
         if score >= 11:
-            pass
+            allSprites.add(boss)
 
         # Update and draw all sprites
         allSprites.update()
