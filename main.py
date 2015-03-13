@@ -15,7 +15,7 @@ pygame.mouse.set_visible(0) # Cursor
 class Player(pygame.sprite.Sprite): # Player Class
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('resources/protag.png') # Load player sprite image
+        self.image = pygame.image.load('resources\protag.png') # Load player sprite image
         self.rect = self.image.get_rect() # Make a rectangle using the image dimensions
         self.rect.x = x # Set top left x coordinate to passed value
         self.rect.y = y # Set top left y coordinate to passed value
@@ -53,7 +53,7 @@ class Player(pygame.sprite.Sprite): # Player Class
 class Bullet(pygame.sprite.Sprite): # Projectile Class
     def __init__(self):
         pygame.sprite.Sprite.__init__(self) # Initiate parent class
-        self.image = pygame.image.load('resources/disc.png') # Set sprite image
+        self.image = pygame.image.load('resources\disc.png') # Set sprite image
         self.rect = self.image.get_rect() # Get rectangle from sprite image
         self.rect.x = -100
         self.rect.y = -100
@@ -65,16 +65,28 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
         if pygame.sprite.groupcollide(bulletSprites, enemySprites, True, True) or pygame.sprite.groupcollide(bulletSprites, flyerSprites, True, True): 
             player.headcount += 1 # Add to player score if enemy is hit
 
-            # Set boundaries
-            if self.rect.y <= -100:
-                self.kill()
+        # Set boundaries
+        if self.rect.y <= -100:
+            self.kill()
 
 class enemyBullet(Bullet):
-    def __init__(self):
+    def __init__(self, x, y):
         Bullet.__init__(self)
-        self.image = pygame.image.load('resources/kha.png')
+        self.image = pygame.image.load('resources\kha.png')
         self.vel = 20
+        self.rect.x = x
+        self.rect.y = y
 
+    def update(self):
+        self.rect.y += self.vel
+
+        # Check for collision between bullet and player
+        if pygame.sprite.spritecollide(player, enemySprites, True):
+            self.kill()
+
+        # Set boundaries
+        if self.rect.y >= 650:
+            self.kill()
 
 class Enemy(pygame.sprite.Sprite): # Enemy super class
     '''
@@ -137,6 +149,7 @@ def main():
     global enemySprites
     global flyerSprites
     global score
+    global enemyBullets
 
 
     # Create an instance of the player at a certain position
@@ -155,7 +168,7 @@ def main():
 
     # Bullet variable for later creation of Bullet object
     global bullet
-
+    global flyerBullet
 
     # Create boss object
     global boss
@@ -168,6 +181,7 @@ def main():
     enemySprites = pygame.sprite.RenderPlain()
     flyerSprites = pygame.sprite.RenderPlain()
     bossSprite = pygame.sprite.RenderPlain()
+    enemyBullets = pygame.sprite.RenderPlain()
 
     # Add sprites to appropriate groups
     playerSprite.add(player)
@@ -182,6 +196,10 @@ def main():
 
 
     pVel = 20 # Set default player velocity to pass to Player constructor
+
+    reloadspeed = 500
+    reloadEvent = pygame.USEREVENT + 1
+    Reloaded = True
     
     # Set fonts
     scoreFont = pygame.font.SysFont("courier", 24)
@@ -234,9 +252,15 @@ def main():
                 elif event.key == pygame.K_SPACE and not playerSprite.has(player):
                     gm = mainMenu()
                     gm.run()
+
+            elif event.type == reloadEvent:
+                for flyer in flyerSprites:
+                    Reloaded = True
+                    flyerBullet = enemyBullet(flyer.rect.x, flyer.rect.y)
+                    enemyBullets.add(flyerBullet)
+                    allSprites.add(flyerBullet)
+                    pygame.time.set_timer(reloadEvent, 0)
                     
-
-
 
         # Create screen surface object and draw objects on it
         screen.fill((255,255,255))
@@ -252,6 +276,10 @@ def main():
                 flyerSprites.add(newFlyer)
                 allSprites.add(newFlyer)
 
+        if Reloaded and playerSprite.has(player):
+            Reloaded = False
+            pygame.time.set_timer(reloadEvent, reloadspeed)
+
         # Update and draw all sprites
         allSprites.update()
         allSprites.draw(screen)
@@ -261,7 +289,7 @@ def main():
             enemySprites.empty()
             allSprites.empty() # Clear all sprites
             gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
-            screen.blit(gameover, (300,300))
+            screen.blit(gameover, (250,300))
 
         # Keep score
         score = player.headcount
