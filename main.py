@@ -73,7 +73,7 @@ class enemyBullet(Bullet):
     def __init__(self, x, y):
         Bullet.__init__(self)
         self.image = pygame.image.load('resources\kha.png')
-        self.vel = 20
+        self.vel = 10
         self.rect.x = x
         self.rect.y = y
 
@@ -81,20 +81,14 @@ class enemyBullet(Bullet):
         self.rect.y += self.vel
 
         # Check for collision between bullet and player
-        if pygame.sprite.spritecollide(player, enemySprites, True):
-            self.kill()
+        if pygame.sprite.spritecollide(player, enemyBullets, True):
+            player.kill()
 
         # Set boundaries
         if self.rect.y >= 650:
             self.kill()
 
 class Enemy(pygame.sprite.Sprite): # Enemy super class
-    '''
-    This is the enemy super class. It is designed to hold all of the necessary variables for enemies that can be
-    changed according to varying enemy types. Perhaps later this can be consolidated into a super class for both the
-    Player and Enemy classes.
-    '''
-
     def __init__(self, x, y):
         # Default values
         pygame.sprite.Sprite.__init__(self)
@@ -137,7 +131,6 @@ class Boss(pygame.sprite.Sprite):
 
 '''
 Current goals:
-    Add enemy projectiles
     Design the first boss fight
 '''
 
@@ -197,7 +190,7 @@ def main():
 
     pVel = 20 # Set default player velocity to pass to Player constructor
 
-    reloadspeed = 500
+    reloadspeed = 1000
     reloadEvent = pygame.USEREVENT + 1
     Reloaded = True
     
@@ -256,6 +249,7 @@ def main():
             elif event.type == reloadEvent:
                 for flyer in flyerSprites:
                     Reloaded = True
+                    reloadspeed += randrange(0, 500, 100)
                     flyerBullet = enemyBullet(flyer.rect.x, flyer.rect.y)
                     enemyBullets.add(flyerBullet)
                     allSprites.add(flyerBullet)
@@ -271,25 +265,18 @@ def main():
                 newEnemy = Enemy(randrange(0, 750, 1), randrange(-150, -50, 1))
                 enemySprites.add(newEnemy)
                 allSprites.add(newEnemy)
-            if flyerSprites.__len__() <= 5:
+            if flyerSprites.__len__() <= 3:
                 newFlyer = secretEnemy(randrange(-150, -50, 1), randrange(0, 100, 1))
                 flyerSprites.add(newFlyer)
                 allSprites.add(newFlyer)
 
-        if Reloaded and playerSprite.has(player):
-            Reloaded = False
-            pygame.time.set_timer(reloadEvent, reloadspeed)
+        if Reloaded and playerSprite.has(player): #Check if player is alive and enemies can shoot
+            Reloaded = False # Expend shot
+            pygame.time.set_timer(reloadEvent, reloadspeed) # Repeat
 
         # Update and draw all sprites
         allSprites.update()
         allSprites.draw(screen)
-
-        # It's game over, man, game over!
-        if not playerSprite.has(player): # Check if player has died
-            enemySprites.empty()
-            allSprites.empty() # Clear all sprites
-            gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
-            screen.blit(gameover, (250,300))
 
         # Keep score
         score = player.headcount
@@ -300,6 +287,15 @@ def main():
         # Enemy counter for boss fight
         if score >= 11:
             allSprites.add(boss)
+
+        # It's game over, man, game over!
+        if not playerSprite.has(player): # Check if player has died
+            enemySprites.empty()
+            allSprites.empty() # Clear all sprites
+            gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
+            screen.blit(gameover, (250,300))
+            pressSpace = gameoverFont.render("Press Space To Return", 1, (0, 0, 0))
+            screen.blit(pressSpace, (150, 500))
 
         # Update the display
         pygame.display.update()
@@ -320,11 +316,13 @@ class mainMenu():
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont('courier', 48)
         self.titleFont = pygame.font.SysFont('courier', 53)
+        self.directFont = pygame.font.SysFont('courier', 24)
         self.color = (0, 255, 0)
 
     def run(self):
         title = self.titleFont.render('Lembalo: Virus Breaker', 1, self.color)
         start = self.font.render('Start', 1, self.color)
+        directions = self.directFont.render('Arrow Keys To Move. Space to Shoot. Good Luck.', 1, self.color)
         quitgame = self.font.render('Quit', 1, self.color)
         
         cursor = 0
@@ -360,6 +358,7 @@ class mainMenu():
             screen.blit(title, (50, 50))
             screen.blit(start, (100, 300))
             screen.blit(quitgame, (100, 400))
+            screen.blit(directions, (50, 550))
             bracegroup.draw(screen)
             bracegroup.update()
                 
