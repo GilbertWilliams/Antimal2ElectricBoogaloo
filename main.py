@@ -74,7 +74,7 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
 class enemyBullet(Bullet):
     def __init__(self, x, y):
         Bullet.__init__(self)
-        self.image = pygame.image.load('resources\kha.png')
+        self.image = pygame.image.load('resources\worm.png')
         self.vel = 10
         self.rect.x = x
         self.rect.y = y
@@ -128,7 +128,7 @@ class Boss(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.health = 10
+        self.health = 20
         self.dx = 6
         self.bosscounter = 0
 
