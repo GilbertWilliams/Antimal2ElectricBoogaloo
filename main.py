@@ -127,7 +127,6 @@ class Boss(pygame.sprite.Sprite):
 Current goals:
     Add enemy projectiles
     Design the first boss fight
-    Title Screen
 '''
 
 def main():
@@ -276,8 +275,7 @@ def main():
 
         # Update the display
         pygame.display.update()
-        if keepGoing == False:
-            pygame.quit()
+    pygame.quit()
 
 class menuCursor(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -320,7 +318,7 @@ class mainMenu():
                     elif event.key == K_UP and cursor == 1:
                         cursor = 0
                         brace.rect.y = 300
-                    elif event.key == K_SPACE:
+                    elif event.key == K_SPACE or event.key == K_RETURN:
                         if cursor == 0:
                             mainloop = False
                             main()
