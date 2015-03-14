@@ -16,7 +16,7 @@ pygame.mouse.set_visible(0) # Cursor
 class Player(pygame.sprite.Sprite): # Player Class
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('resources\protag.png') # Load player sprite image
+        self.image = pygame.image.load('resources/protag.png') # Load player sprite image
         self.rect = self.image.get_rect() # Make a rectangle using the image dimensions
         self.rect.x = x # Set top left x coordinate to passed value
         self.rect.y = y # Set top left y coordinate to passed value
@@ -54,7 +54,7 @@ class Player(pygame.sprite.Sprite): # Player Class
 class Bullet(pygame.sprite.Sprite): # Projectile Class
     def __init__(self):
         pygame.sprite.Sprite.__init__(self) # Initiate parent class
-        self.image = pygame.image.load('resources\disc.png') # Set sprite image
+        self.image = pygame.image.load('resources/disc.png') # Set sprite image
         self.rect = self.image.get_rect() # Get rectangle from sprite image
         self.rect.x = -100
         self.rect.y = -100
@@ -74,7 +74,7 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
 class enemyBullet(Bullet):
     def __init__(self, x, y):
         Bullet.__init__(self)
-        self.image = pygame.image.load('resources\worm.png')
+        self.image = pygame.image.load('resources/worm.png')
         self.vel = 10
         self.rect.x = x
         self.rect.y = y
@@ -94,7 +94,7 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
     def __init__(self, x, y):
         # Default values
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('resources\missile.png')
+        self.image = pygame.image.load('resources/missile.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -113,7 +113,7 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
 
 class secretEnemy(Enemy):
     def __init__(self, x, y):
-        Enemy.__init__(self, x, y)
+        Enemy.__init__(self, x, y) 
         self.image = pygame.image.load('resources/ufo.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -124,7 +124,7 @@ class secretEnemy(Enemy):
 class Boss(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('resources\hotshotgg.png')
+        self.image = pygame.image.load('resources/hotshotgg.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
