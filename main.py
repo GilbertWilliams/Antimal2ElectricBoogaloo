@@ -181,7 +181,6 @@ def main():
 
     # Create boss object
     global boss
-    boss = Boss(325, 50)
     
     # Define sprite groups
     allSprites = pygame.sprite.RenderPlain()
@@ -300,6 +299,7 @@ def main():
         scoreLimit = 30
         # Enemy counter for boss fight
         if score >= scoreLimit and not hasSpawned:
+            boss = Boss(325, 50)
             bossSprite.add(boss)
             allSprites.add(boss)
             hasSpawned = True
@@ -340,7 +340,7 @@ def main():
 
         # Update the display
         pygame.display.update()
-    pygame.quit()
+    sys.exit
 
 class menuCursor(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -405,7 +405,7 @@ class mainMenu():
                 
                 
             pygame.display.update()
-        pygame.quit()
+        sys.exit
 
 
 if __name__ == '__main__':
