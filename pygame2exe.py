@@ -69,8 +69,8 @@ class BuildExe:
  
         #Extra files/dirs copied to game
         self.extra_datas = []
-        for files in os.listdir('C:/Users/Roberto/Documents/GitHub/Antimal2ElectricBoogaloo/resources'):
-                f1 = 'C:/Users/Roberto/Documents/GitHub/Antimal2ElectricBoogaloo/resources' + files
+        for files in os.listdir('C:/Users/Austen/Documents/GitHub/Antimal2ElectricBoogaloo/resources'):
+                f1 = 'C:/Users/Austen/Documents/GitHub/Antimal2ElectricBoogaloo/resources' + files
                 if os.path.isfile(f1):
                     f2 = 'resources', [f1]
                     self.extra_datas.append(f2)
