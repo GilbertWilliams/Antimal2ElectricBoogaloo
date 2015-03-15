@@ -1,3 +1,4 @@
+
 __author__ = 'Austen Stewart, Joey Tarleton, and Robert Wilhelmsen'
 
 # Import pygame and all of it's classes
@@ -158,7 +159,9 @@ def main():
     global bossSprite
     global enemyBullets
     global hasDied
+    global hasSpawned
     hasDied = False
+    hasSpawned = False
 
 
     # Create an instance of the player at a certain position
@@ -217,7 +220,7 @@ def main():
     #Set Clock
     clock = pygame.time.Clock()
     keepGoing = True
-    hasSpawned = False
+    
     counter = 0
 
 
@@ -274,7 +277,7 @@ def main():
                     allSprites.add(flyerBullet)
                     pygame.time.set_timer(reloadEvent, 0)
 
-            elif event.type == bossre:
+            elif event.type == bossre and bossSprite.has(boss):
                 bossReload = True
                 bossBullet1 = enemyBullet(boss.rect.x, boss.rect.y + 75)
                 bossBullet2 = enemyBullet(boss.rect.x + 150, boss.rect.y + 75)
@@ -340,7 +343,9 @@ def main():
 
         # Update the display
         pygame.display.update()
-    sys.exit
+
+    pygame.quit()
+    sys.exit()
 
 class menuCursor(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -387,8 +392,9 @@ class mainMenu():
                         brace.rect.y = 300
                     elif event.key == K_SPACE or event.key == K_RETURN:
                         if cursor == 0:
-                            mainloop = False
                             main()
+                            mainloop = False
+                            
                         elif cursor == 1:
                             mainloop = False
                     elif event.key == K_ESCAPE:
@@ -411,3 +417,5 @@ class mainMenu():
 if __name__ == '__main__':
     gm = mainMenu()
     gm.run()
+    pygame.quit()
+    sys.exit()
