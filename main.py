@@ -411,7 +411,9 @@ class mainMenu():
                 
                 
             pygame.display.update()
-        sys.exit
+            
+        pygame.quit()
+        sys.exit()
 
 
 if __name__ == '__main__':
