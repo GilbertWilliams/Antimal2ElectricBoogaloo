@@ -59,7 +59,7 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
         self.rect = self.image.get_rect() # Get rectangle from sprite image
         self.rect.x = -100
         self.rect.y = -100
-        self.vel = -20 # Default velocity
+        self.vel = -30 # Default velocity
 
     def update(self):
         self.rect.y += self.vel # Change bullet position
@@ -76,6 +76,7 @@ class enemyBullet(Bullet):
     def __init__(self, x, y):
         Bullet.__init__(self)
         self.image = pygame.image.load('resources/worm.png')
+        self.rect = self.image.get_rect()
         self.vel = 10
         self.rect.x = x
         self.rect.y = y
@@ -172,7 +173,7 @@ def main():
     #Spawns enemies at random X values and offscreen by 50 on the Y axis
     enemy = [Enemy(randrange(0, 750, 1), randrange(-50, 50, 1))]
 
-    flyer = [secretEnemy(randrange(-50, 50, 1), randrange(0, 300, 1))]
+    flyer = [secretEnemy(randrange(-50, 50, 1), randrange(0, 150, 1))]
 
     # Add more initial enemies
     for x in range(0, 3):
@@ -241,7 +242,7 @@ def main():
                     player.move(-pVel, 'y')
                 elif event.key == pygame.K_DOWN:
                     player.move(pVel, 'y')
-                elif event.key == pygame.K_SPACE:
+                elif event.key == pygame.K_z and playerSprite.has(player):
                     bullet = Bullet()
                     bulletSprites.add(bullet)
                     allSprites.add(bullet)
@@ -261,10 +262,7 @@ def main():
                     player.move(0, 'y')
                 elif event.key == pygame.K_ESCAPE:
                     keepGoing = False
-                elif event.key == pygame.K_SPACE and not playerSprite.has(player):
-                    gm = mainMenu()
-                    gm.run()
-                elif score >= scoreLimit and not bossSprite.has(boss):
+                elif event.key == (pygame.K_SPACE and not playerSprite.has(player)) or (score >= scoreLimit and not bossSprite.has(boss)):
                     gm = mainMenu()
                     gm.run()
 
@@ -277,7 +275,7 @@ def main():
                     allSprites.add(flyerBullet)
                     pygame.time.set_timer(reloadEvent, 0)
 
-            elif event.type == bossre and bossSprite.has(boss):
+            elif event.type == bossre and bossSprite.has(boss) and playerSprite.has(player):
                 bossReload = True
                 bossBullet1 = enemyBullet(boss.rect.x, boss.rect.y + 75)
                 bossBullet2 = enemyBullet(boss.rect.x + 150, boss.rect.y + 75)
@@ -299,7 +297,7 @@ def main():
         scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
         screen.blit(scoreboard, (25,25))
 
-        scoreLimit = 30
+        scoreLimit = 3
         # Enemy counter for boss fight
         if score >= scoreLimit and not hasSpawned:
             boss = Boss(325, 50)
@@ -368,7 +366,7 @@ class mainMenu():
     def run(self):
         title = self.titleFont.render('Lembalo: Virus Breaker', 1, self.color)
         start = self.font.render('Start', 1, self.color)
-        directions = self.directFont.render('Arrow Keys To Move. Space to Shoot. Good Luck.', 1, self.color)
+        directions = self.directFont.render('Arrow Keys To Move. Z to Shoot. Good Luck.', 1, self.color)
         quitgame = self.font.render('Quit', 1, self.color)
         
         cursor = 0
