@@ -73,7 +73,7 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
             player.headcount += 1 # Add to player score if enemy is hit
 
         # Set boundaries
-        if self.rect.y <= -100:
+        if self.rect.y <= -50:
 
             self.kill()
 
@@ -106,10 +106,8 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
         self.rect.x = x
         self.rect.y = y
         self.dx = 0
-        self.dy = 7
+        self.dy = randrange(10, 17, 1)
         self.fire = 1
-        
-
     
     def update(self):
         # Change enemy position
@@ -130,7 +128,7 @@ class Flier(Enemy):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.dx = 3
+        self.dx = 6
         self.dy = 0
 
     def shoot(self):
@@ -145,13 +143,11 @@ class Flier(Enemy):
         self.rect.y += self.dy
 
         # Set enemy boundaries
-        if self.rect.x > 800 or self.rect.x < -50:
-            self.kill()
-        if self.rect.y > 600 or self.rect.y < -50:
+        if self.rect.x > 800 or self.rect.x < -50 or self.rect.y > 600 or self.rect.y < -50:
             self.kill()
 
         self.shoot()
-        self.fire = randrange(0, 60, 1)
+        self.fire = randrange(0, 30, 1)
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -179,7 +175,10 @@ class Boss(pygame.sprite.Sprite):
             self.kill()
             bossDead = True
 
-def main():
+def levelTwo():
+    pass
+
+def levelOne():
 
     global bullet
     global bulletSprites
@@ -191,8 +190,10 @@ def main():
     global enemyBullets
     global bossDead
     global bossSpawn
+    global isAlive
     bossDead = False
     bossSpawn = False
+    isAlive = True
 
 
     # Create an instance of the player at a certain position
@@ -201,7 +202,7 @@ def main():
 
     global enemy
     #Spawns enemies at random X values and offscreen by 50 on the Y axis
-    enemy = [Enemy(randrange(0, 750, 1), randrange(-50, 50, 1))]
+    enemy = [Enemy(randrange(0, 750, 10), randrange(-50, 50, 10))]
 
     flier = [Flier(randrange(-50, 50, 1), randrange(0, 150, 1))]
 
@@ -234,13 +235,16 @@ def main():
 
     pVel = 20 # Set default player velocity to pass to Player constructor
 
-    reloadspeed = 1000
-    reloadEvent = pygame.USEREVENT + 1
-    Reloaded = True
+    # Create an event to spawn enemies
+    enemySpawn = pygame.USEREVENT + 1
+    pygame.time.set_timer(enemySpawn, 10)
 
-    bossReload = True
-    bossrs = 750
-    bossre = pygame.USEREVENT + 2
+    flierSpawn = pygame.USEREVENT + 2
+    pygame.time.set_timer(flierSpawn, 30)
+
+    # Create an event for the boss to shoot at a given interval
+    bossre = pygame.USEREVENT + 3
+    pygame.time.set_timer(bossre, 750)
 
     # Set fonts
     scoreFont = pygame.font.SysFont("courier", 24)
@@ -250,9 +254,6 @@ def main():
     #Set Clock
     clock = pygame.time.Clock()
     keepGoing = True
-
-    counter = 0
-
 
     #Main Loop
     while keepGoing:
@@ -271,13 +272,12 @@ def main():
                     player.move(-pVel, 'y')
                 elif event.key == pygame.K_DOWN:
                     player.move(pVel, 'y')
-                elif event.key == pygame.K_SPACE and playerSprite.has(player) and not bossDead:
+                elif event.key == pygame.K_SPACE and isAlive and not bossDead:
                     bullet = Bullet()
                     bulletSprites.add(bullet)
                     allSprites.add(bullet)
                     bullet.rect.x = player.rect.x
                     bullet.rect.y = player.rect.y
-
 
             # Stop Moving
             elif event.type == pygame.KEYUP:
@@ -291,18 +291,25 @@ def main():
                     player.move(0, 'y')
                 elif event.key == pygame.K_ESCAPE:
                     keepGoing = False
-                elif event.key == pygame.K_RETURN and (not playerSprite.has(player) or bossDead):
+                elif event.key == pygame.K_RETURN and (not isAlive or bossDead):
                     gm = mainMenu()
                     gm.run()
 
+            elif event.type == enemySpawn and not bossSpawn and isAlive:
+                newEnemy = Enemy(randrange(10, 750, 10), randrange(-150, -50, 1))
+                enemySprites.add(newEnemy)
+                allSprites.add(newEnemy)
 
-            elif event.type == bossre and bossSpawn and playerSprite.has(player):
-                bossReload = True
+            elif event.type == flierSpawn and not bossSpawn and isAlive:
+                newflier = Flier(randrange(-150, -50, 1), randrange(10, 100, 1))
+                flierSprites.add(newflier)
+                allSprites.add(newflier)
+
+            elif event.type == bossre and bossSpawn and isAlive:
                 bossBullet1 = flierBullet(boss.rect.x, boss.rect.y + 75)
                 bossBullet2 = flierBullet(boss.rect.x + 150, boss.rect.y + 75)
                 enemyBullets.add(bossBullet1, bossBullet2)
                 allSprites.add(bossBullet1, bossBullet2)
-                pygame.time.set_timer(reloadEvent, 0)
 
 
         # Create screen surface object and draw objects on it
@@ -312,44 +319,23 @@ def main():
         allSprites.update()
         allSprites.draw(screen)
 
+        # Check if player is alive
+        if not playerSprite.has(player):
+            isAlive = False
+
         # Keep score
         score = player.headcount
         scoreString = str(score)
         scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
         screen.blit(scoreboard, (25,25))
 
-        scoreLimit = 30
+        scoreLimit = 50
         # Enemy counter for boss fight
         if score >= scoreLimit and not bossSpawn:
             boss = Boss(325, 50)
             bossSprite.add(boss)
             allSprites.add(boss)
             bossSpawn = True
-
-
-        # Infinitely Spawn Enemies until player has died or boss has spawned
-        if playerSprite.has(player) and not bossSpawn:
-            if enemySprites.__len__() <= 10:
-                newEnemy = Enemy(randrange(0, 750, 1), randrange(-150, -50, 1))
-                enemySprites.add(newEnemy)
-                allSprites.add(newEnemy)
-            if flierSprites.__len__() <= 3:
-                newflier = Flier(randrange(-150, -50, 1), randrange(0, 100, 1))
-                flierSprites.add(newflier)
-                allSprites.add(newflier)
-
-        bossrs = randrange(500, 1500, 250)
-        if bossReload and playerSprite.has(player) and bossSpawn: # Repeat for when boss spawns
-            bossReload = False
-            pygame.time.set_timer(bossre, bossrs)
-
-        if not playerSprite.has(player) or bossDead:
-            Reloaded = False
-            bossReload = False
-            pygame.time.set_timer(reloadEvent, 0)
-            pygame.time.set_timer(bossre, 0)
-
-
 
         # It's game over, man, game over!
         gameover = gameoverFont.render("Game Over", 1, (0, 0, 0)) # Print game over
@@ -360,7 +346,7 @@ def main():
         win = gameoverFont.render("You Win", 1, (0, 0, 0))
         winCenterX = win.get_width() / 2
         winCenterY = win.get_height() / 2
-        if not playerSprite.has(player): # Check if player has died
+        if not isAlive: # Check if player has died
             enemySprites.empty()
             allSprites.empty() # Clear all sprites
             screen.blit(gameover, (CENTERX - gameoverCenterX, CENTERY - gameoverCenterY))
@@ -433,7 +419,7 @@ class mainMenu():
                         brace.rect.y -= 100
                     elif event.key == K_RETURN:
                         if cursor == 0:
-                            main()
+                            levelOne()
                             mainloop = False
                         elif cursor == 1:
                             mainloop = False
