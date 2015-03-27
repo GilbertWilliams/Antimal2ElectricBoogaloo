@@ -377,9 +377,8 @@ def main():
     pygame.quit()
     sys.exit()
 
-'''
-Class for the main menu
-'''
+
+#Class for the main menu
 class menuCursor(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
