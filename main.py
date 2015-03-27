@@ -135,8 +135,9 @@ class Flier(Enemy):
 
     def shoot(self):
         if self.fire == 1:
-            enemyBullets.add(flierBullet(self.rect.x, self.rect.y))
-            allSprites.add(flierBullet(self.rect.x, self.rect.y))
+            ebullet = flierBullet(self.rect.x, self.rect.y)
+            enemyBullets.add(ebullet)
+            allSprites.add(ebullet)
 
     def update(self):
         # Change enemy position
