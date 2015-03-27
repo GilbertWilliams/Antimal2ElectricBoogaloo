@@ -77,7 +77,7 @@ class Bullet(pygame.sprite.Sprite): # Projectile Class
 
             self.kill()
 
-class enemyBullet(Bullet):
+class flierBullet(Bullet):
     def __init__(self, x, y):
         Bullet.__init__(self)
         self.image = pygame.image.load('resources/worm.png')
@@ -107,6 +107,10 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
         self.rect.y = y
         self.dx = 0
         self.dy = 7
+        self.fire = 1
+        
+
+    
     def update(self):
         # Change enemy position
         self.rect.x += self.dx
@@ -118,7 +122,8 @@ class Enemy(pygame.sprite.Sprite): # Enemy super class
         if self.rect.y > 600 or self.rect.y < -50:
             self.kill()
 
-class secretEnemy(Enemy):
+
+class Flier(Enemy):
     def __init__(self, x, y):
         Enemy.__init__(self, x, y)
         self.image = pygame.image.load('resources/ufo.png')
@@ -127,6 +132,25 @@ class secretEnemy(Enemy):
         self.rect.y = y
         self.dx = 3
         self.dy = 0
+
+    def shoot(self):
+        if self.fire == 1:
+            enemyBullets.add(flierBullet(self.rect.x, self.rect.y))
+            allSprites.add(flierBullet(self.rect.x, self.rect.y))
+
+    def update(self):
+        # Change enemy position
+        self.rect.x += self.dx
+        self.rect.y += self.dy
+
+        # Set enemy boundaries
+        if self.rect.x > 800 or self.rect.x < -50:
+            self.kill()
+        if self.rect.y > 600 or self.rect.y < -50:
+            self.kill()
+
+        self.shoot()
+        self.fire = randrange(0, 60, 1)
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, x, y):
@@ -178,7 +202,7 @@ def main():
     #Spawns enemies at random X values and offscreen by 50 on the Y axis
     enemy = [Enemy(randrange(0, 750, 1), randrange(-50, 50, 1))]
 
-    flier = [secretEnemy(randrange(-50, 50, 1), randrange(0, 150, 1))]
+    flier = [Flier(randrange(-50, 50, 1), randrange(0, 150, 1))]
 
     # Add more initial enemies
     for x in range(0, 3):
@@ -186,7 +210,6 @@ def main():
 
     # Bullet variable for later creation of Bullet object
     global bullet
-    global flierBullet
 
     # Create boss object
     global boss
@@ -271,19 +294,11 @@ def main():
                     gm = mainMenu()
                     gm.run()
 
-            elif event.type == reloadEvent:
-                for flier in flierSprites:
-                    Reloaded = True
-                    reloadspeed += randrange(0, 500, 100)
-                    flierBullet = enemyBullet(flier.rect.x, flier.rect.y)
-                    enemyBullets.add(flierBullet)
-                    allSprites.add(flierBullet)
-                    pygame.time.set_timer(reloadEvent, 0)
 
             elif event.type == bossre and bossSpawn and playerSprite.has(player):
                 bossReload = True
-                bossBullet1 = enemyBullet(boss.rect.x, boss.rect.y + 75)
-                bossBullet2 = enemyBullet(boss.rect.x + 150, boss.rect.y + 75)
+                bossBullet1 = flierBullet(boss.rect.x, boss.rect.y + 75)
+                bossBullet2 = flierBullet(boss.rect.x + 150, boss.rect.y + 75)
                 enemyBullets.add(bossBullet1, bossBullet2)
                 allSprites.add(bossBullet1, bossBullet2)
                 pygame.time.set_timer(reloadEvent, 0)
@@ -318,14 +333,11 @@ def main():
                 enemySprites.add(newEnemy)
                 allSprites.add(newEnemy)
             if flierSprites.__len__() <= 3:
-                newflier = secretEnemy(randrange(-150, -50, 1), randrange(0, 100, 1))
+                newflier = Flier(randrange(-150, -50, 1), randrange(0, 100, 1))
                 flierSprites.add(newflier)
                 allSprites.add(newflier)
 
-        if Reloaded and playerSprite.has(player): # Check if player is alive and enemies can shoot
-            Reloaded = False # Expend shot
-            pygame.time.set_timer(reloadEvent, reloadspeed) # Repeat
-
+        bossrs = randrange(500, 1500, 250)
         if bossReload and playerSprite.has(player) and bossSpawn: # Repeat for when boss spawns
             bossReload = False
             pygame.time.set_timer(bossre, bossrs)
