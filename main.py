@@ -29,6 +29,7 @@ class Player(pygame.sprite.Sprite): # Player Class
         self.dx = 0 # Set default velocity on the x-axis
         self.dy = 0 # Set default velocity on the y-axis
         self.headcount = 0
+        self.lives = 3
 
     def move(self, vel, ax):
         # Check if moving along the x- or y-axis based on passed ax value and change velocity according to vel value
@@ -36,6 +37,9 @@ class Player(pygame.sprite.Sprite): # Player Class
             self.dx = vel
         elif ax =='y':
             self.dy = vel
+
+    def takeLife(self):
+        self.lives -= 1
 
     def update(self):
         # Change player position
@@ -54,7 +58,9 @@ class Player(pygame.sprite.Sprite): # Player Class
 
         # Creates collision with enemies and deletes itself
         if pygame.sprite.spritecollide(player, enemySprites, True) or pygame.sprite.spritecollide(player, flierSprites, True):
-            self.kill()
+            if self.lives <= 0:
+                self.kill()
+            self.takeLife()
 
 
 class Bullet(pygame.sprite.Sprite): # Projectile Class
@@ -91,7 +97,7 @@ class flierBullet(Bullet):
 
         # Check for collision between bullet and player
         if pygame.sprite.spritecollide(player, enemyBullets, True):
-            player.kill()
+            player.takeLife()
 
         # Set boundaries
         if self.rect.y >= 650:
