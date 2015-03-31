@@ -26,6 +26,10 @@ class Player(pygame.sprite.Sprite): # Player Class
         self.rect = self.image.get_rect() # Make a rectangle using the image dimensions
         self.rect.x = x # Set top left x coordinate to passed value
         self.rect.y = y # Set top left y coordinate to passed value
+        self.width = self.rect.width
+        self.height = self.rect.height
+        self.centerx = self.width / 2
+        self.centery = self.height / 2
         self.dx = 0 # Set default velocity on the x-axis
         self.dy = 0 # Set default velocity on the y-axis
         self.headcount = 0
@@ -40,6 +44,7 @@ class Player(pygame.sprite.Sprite): # Player Class
 
     def takeLife(self):
         self.lives -= 1
+        screen.fill((255, 0, 0))
 
     def update(self):
         # Change player position
@@ -60,16 +65,21 @@ class Player(pygame.sprite.Sprite): # Player Class
         if pygame.sprite.spritecollide(player, enemySprites, True) or pygame.sprite.spritecollide(player, flierSprites, True):
             if self.lives <= 0:
                 self.kill()
-            self.takeLife()
+            else:
+                self.takeLife()
 
 
 class Bullet(pygame.sprite.Sprite): # Projectile Class
     def __init__(self):
         pygame.sprite.Sprite.__init__(self) # Initiate parent class
-        self.image = pygame.image.load('resources/disc.png') # Set sprite image
+        self.image = pygame.image.load('resources/disc_s.png') # Set sprite image
         self.rect = self.image.get_rect() # Get rectangle from sprite image
         self.rect.x = -100
         self.rect.y = -100
+        self.width = self.rect.width
+        self.height = self.rect.height
+        self.centerx = self.width / 2
+        self.centery = self.height / 2
         self.vel = -30 # Default velocity
 
     def update(self):
@@ -97,7 +107,11 @@ class flierBullet(Bullet):
 
         # Check for collision between bullet and player
         if pygame.sprite.spritecollide(player, enemyBullets, True):
-            player.takeLife()
+            if player.lives <= 0:
+                player.kill()
+            else:
+                player.takeLife()
+
 
         # Set boundaries
         if self.rect.y >= 650:
@@ -134,7 +148,7 @@ class Flier(Enemy):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.dx = 6
+        self.dx = randrange(5, 15, 1)
         self.dy = 0
 
     def shoot(self):
@@ -158,7 +172,7 @@ class Flier(Enemy):
 class Boss(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load('resources/hotshotgg.png')
+        self.image = pygame.image.load('sprites/keanu.png')
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
@@ -210,7 +224,7 @@ def levelOne():
     #Spawns enemies at random X values and offscreen by 50 on the Y axis
     enemy = [Enemy(randrange(0, 750, 10), randrange(-50, 50, 10))]
 
-    flier = [Flier(randrange(-50, 50, 1), randrange(0, 150, 1))]
+    flier = [Flier(randrange(-50, 50, 1), randrange(60, 150, 1))]
 
     # Add more initial enemies
     for x in range(0, 3):
@@ -282,8 +296,8 @@ def levelOne():
                     bullet = Bullet()
                     bulletSprites.add(bullet)
                     allSprites.add(bullet)
-                    bullet.rect.x = player.rect.x
-                    bullet.rect.y = player.rect.y
+                    bullet.rect.x = player.rect.x + player.centerx - bullet.centerx
+                    bullet.rect.y = player.rect.y + player.centery / 2 - bullet.centery
 
             # Stop Moving
             elif event.type == pygame.KEYUP:
@@ -307,11 +321,11 @@ def levelOne():
                 allSprites.add(newEnemy)
 
             elif event.type == flierSpawn and not bossSpawn and isAlive:
-                newflier = Flier(randrange(-150, -50, 1), randrange(10, 100, 1))
+                newflier = Flier(randrange(-150, -50, 1), randrange(60, 100, 1))
                 flierSprites.add(newflier)
                 allSprites.add(newflier)
 
-            elif event.type == bossre and bossSpawn and isAlive:
+            elif event.type == bossre and bossSpawn and isAlive and bossDead:
                 bossBullet1 = flierBullet(boss.rect.x, boss.rect.y + 75)
                 bossBullet2 = flierBullet(boss.rect.x + 150, boss.rect.y + 75)
                 enemyBullets.add(bossBullet1, bossBullet2)
@@ -321,6 +335,7 @@ def levelOne():
         # Create screen surface object and draw objects on it
         screen.fill((255,255,255))
 
+
         # Update and draw all sprites
         allSprites.update()
         allSprites.draw(screen)
@@ -329,11 +344,20 @@ def levelOne():
         if not playerSprite.has(player):
             isAlive = False
 
+        topbit = (Rect((0, 0), (800, 50)))
+        screen.fill((0, 0, 0), topbit)
+
         # Keep score
         score = player.headcount
         scoreString = str(score)
-        scoreboard = scoreFont.render("score: " + scoreString, 1, (0, 0, 0))
-        screen.blit(scoreboard, (25,25))
+        scoreboard = scoreFont.render("score: " + scoreString, 1, (255, 255, 255))
+        screen.blit(scoreboard, (25,10))
+
+        # Count lives
+        lives = player.lives
+        liveString = str(lives)
+        liveCount = scoreFont.render("lives: " + liveString, 1, (255, 255, 255))
+        screen.blit(liveCount, (650,10))
 
         scoreLimit = 50
         # Enemy counter for boss fight
