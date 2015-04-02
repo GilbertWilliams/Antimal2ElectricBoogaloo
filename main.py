@@ -16,17 +16,7 @@ pygame.display.set_caption("Space Shooter") # Set window title
 screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Set window dimensions
 pygame.mouse.set_visible(0) # Cursor
 
-global bullet
-global bulletSprites
-global allSprites
-global enemySprites
-global flierSprites
-global score
-global bossSprite
-global enemyBullets
-global bossDead
-global bossSpawn
-global isAlive
+
 
 
 #NOTE: All sprite images (with the exception of bullets) are 50x50
@@ -211,7 +201,17 @@ def levelTwo():
     pass
 
 def levelOne():
-
+    global bullet
+    global bulletSprites
+    global allSprites
+    global enemySprites
+    global flierSprites
+    global score
+    global bossSprite
+    global enemyBullets
+    global bossDead
+    global bossSpawn
+    global isAlive
     
     bossDead = False
     bossSpawn = False
@@ -327,7 +327,7 @@ def levelOne():
                 flierSprites.add(newflier)
                 allSprites.add(newflier)
 
-            elif event.type == bossre and bossSpawn and isAlive and bossDead:
+            elif event.type == bossre and bossSpawn and isAlive and not bossDead:
                 bossBullet1 = flierBullet(boss.rect.x, boss.rect.y + 75)
                 bossBullet2 = flierBullet(boss.rect.x + 150, boss.rect.y + 75)
                 enemyBullets.add(bossBullet1, bossBullet2)
@@ -361,7 +361,7 @@ def levelOne():
         liveCount = scoreFont.render("lives: " + liveString, 1, (255, 255, 255))
         screen.blit(liveCount, (650,10))
 
-        scoreLimit = 50
+        scoreLimit = 40
         # Enemy counter for boss fight
         if score >= scoreLimit and not bossSpawn:
             boss = Boss(325, 50)
