@@ -16,6 +16,18 @@ pygame.display.set_caption("Space Shooter") # Set window title
 screen = pygame.display.set_mode((SCREENWIDTH, SCREENHEIGHT)) # Set window dimensions
 pygame.mouse.set_visible(0) # Cursor
 
+global bullet
+global bulletSprites
+global allSprites
+global enemySprites
+global flierSprites
+global score
+global bossSprite
+global enemyBullets
+global bossDead
+global bossSpawn
+global isAlive
+
 
 #NOTE: All sprite images (with the exception of bullets) are 50x50
 
@@ -200,17 +212,7 @@ def levelTwo():
 
 def levelOne():
 
-    global bullet
-    global bulletSprites
-    global allSprites
-    global enemySprites
-    global flierSprites
-    global score
-    global bossSprite
-    global enemyBullets
-    global bossDead
-    global bossSpawn
-    global isAlive
+    
     bossDead = False
     bossSpawn = False
     isAlive = True
