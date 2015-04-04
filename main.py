@@ -197,8 +197,34 @@ class Boss(pygame.sprite.Sprite):
             self.kill()
             bossDead = True
 
-def levelTwo():
-    pass
+def playerControls(event): # Method that takes event passed from for loop and checks for a move or shoot command
+    if event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_LEFT:
+            player.move(-pVel, 'x')
+        elif event.key == pygame.K_RIGHT:
+            player.move(pVel, 'x')
+        elif event.key == pygame.K_UP:
+            player.move(-pVel, 'y')
+        elif event.key == pygame.K_DOWN:
+            player.move(pVel, 'y')
+        elif event.key == pygame.K_SPACE and isAlive and not bossDead:
+            bullet = Bullet()
+            bulletSprites.add(bullet)
+            allSprites.add(bullet)
+            bullet.rect.x = player.rect.x + player.centerx - bullet.centerx
+            bullet.rect.y = player.rect.y + player.centery / 2 - bullet.centery
+
+    elif event.type == pygame.KEYUP:
+        if event.key == pygame.K_LEFT:
+            player.move(0, 'x')
+        elif event.key == pygame.K_RIGHT:
+            player.move(0, 'x')
+        elif event.key == pygame.K_UP:
+            player.move(0, 'y')
+        elif event.key == pygame.K_DOWN:
+            player.move(0, 'y')
+
+
 
 def levelOne():
     global bullet
@@ -212,6 +238,8 @@ def levelOne():
     global bossDead
     global bossSpawn
     global isAlive
+    global pVel
+    global keepGoing
     
     bossDead = False
     bossSpawn = False
@@ -282,40 +310,16 @@ def levelOne():
         clock.tick(30)
         #input
         for event in pygame.event.get():
+            playerControls(event) # Passes event to check if player should be moved
             if event.type == pygame.QUIT:
                 keepGoing = False
-            #Controls
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    player.move(-pVel, 'x')
-                elif event.key == pygame.K_RIGHT:
-                    player.move(pVel, 'x')
-                elif event.key == pygame.K_UP:
-                    player.move(-pVel, 'y')
-                elif event.key == pygame.K_DOWN:
-                    player.move(pVel, 'y')
-                elif event.key == pygame.K_SPACE and isAlive and not bossDead:
-                    bullet = Bullet()
-                    bulletSprites.add(bullet)
-                    allSprites.add(bullet)
-                    bullet.rect.x = player.rect.x + player.centerx - bullet.centerx
-                    bullet.rect.y = player.rect.y + player.centery / 2 - bullet.centery
 
-            # Stop Moving
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT:
-                    player.move(0, 'x')
-                elif event.key == pygame.K_RIGHT:
-                    player.move(0, 'x')
-                elif event.key == pygame.K_UP:
-                    player.move(0, 'y')
-                elif event.key == pygame.K_DOWN:
-                    player.move(0, 'y')
-                elif event.key == pygame.K_ESCAPE:
-                    keepGoing = False
-                elif event.key == pygame.K_RETURN and (not isAlive or bossDead):
+                if event.key == pygame.K_RETURN and (not isAlive or bossDead):
                     gm = mainMenu()
                     gm.run()
+                elif event.key == pygame.K_ESCAPE:
+                    keepGoing = False
 
             elif event.type == enemySpawn and not bossSpawn and isAlive:
                 newEnemy = Enemy(randrange(10, 750, 10), randrange(-150, -50, 1))
